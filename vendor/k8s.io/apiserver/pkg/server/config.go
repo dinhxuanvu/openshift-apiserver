@@ -581,6 +581,15 @@ func (c *Config) AddPostStartHook(name string, hook PostStartHookFunc) error {
 		return nil
 	}
 
+	klog.V(1).Infof("@testing Config AddPostStartHook name: %v\n", name)
+
+	klog.V(1).Infof("@testing PostStartHooks len: %v\n", len(c.PostStartHooks))
+	fmt.Printf("@testing PostStartHooks len: %v\n", len(c.PostStartHooks))
+
+	for k, _ := range c.PostStartHooks {
+		fmt.Printf("@testing AddPostStartHook k: %s\n", k)
+		klog.V(1).Infof("@testing AddPostStartHook k: %s\n", k)
+	}
 	if postStartHook, exists := c.PostStartHooks[name]; exists {
 		// this is programmer error, but it can be hard to debug
 		return fmt.Errorf("unable to add %q because it was already registered by: %s", name, postStartHook.originatingStack)
@@ -920,8 +929,11 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 		}
 	}
 
+	klog.V(1).Infof("@testing completedConfig New() name: %s\n", name)
+
 	// first add poststarthooks from delegated targets
 	for k, v := range delegationTarget.PostStartHooks() {
+		klog.V(1).Infof("@testing delegationTarget k: %s\n", k)
 		s.postStartHooks[k] = v
 	}
 
@@ -931,6 +943,7 @@ func (c completedConfig) New(name string, delegationTarget DelegationTarget) (*G
 
 	// add poststarthooks that were preconfigured.  Using the add method will give us an error if the same name has already been registered.
 	for name, preconfiguredPostStartHook := range c.PostStartHooks {
+		klog.V(1).Infof("@testing preconfiguredPostStartHook k: %s\n", name)
 		if err := s.AddPostStartHook(name, preconfiguredPostStartHook.hook); err != nil {
 			return nil, err
 		}
