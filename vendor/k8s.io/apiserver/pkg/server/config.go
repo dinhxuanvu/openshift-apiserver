@@ -584,7 +584,6 @@ func (c *Config) AddPostStartHook(name string, hook PostStartHookFunc) error {
 	klog.V(1).Infof("@testing Config AddPostStartHook name: %v\n", name)
 
 	klog.V(1).Infof("@testing PostStartHooks len: %v\n", len(c.PostStartHooks))
-	fmt.Printf("@testing PostStartHooks len: %v\n", len(c.PostStartHooks))
 
 	for k, _ := range c.PostStartHooks {
 		fmt.Printf("@testing AddPostStartHook k: %s\n", k)

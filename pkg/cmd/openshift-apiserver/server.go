@@ -47,6 +47,10 @@ func RunOpenShiftAPIServer(serverConfig *openshiftcontrolplanev1.OpenShiftAPISer
 		return err
 	}
 
+	if err := openshiftAPIServerRuntimeConfig.ExtraConfig.AdmissionOptions.ApplyTo(&openshiftAPIServerRuntimeConfig.GenericConfig.Config, openshiftAPIServerRuntimeConfig.ExtraConfig.KubeInformers, openshiftAPIServerRuntimeConfig.ExtraConfig.KubeClient, openshiftAPIServerRuntimeConfig.ExtraConfig.DynamicClient, nil, openshiftAPIServerRuntimeConfig.ExtraConfig.AdmissionInitializer); err != nil {
+		return err
+	}
+
 	klog.Infof("Starting master on %s (%s)", serverConfig.ServingInfo.BindAddress, version.Get().String())
 
 	return preparedOpenshiftAPIServer.Run(stopCh)

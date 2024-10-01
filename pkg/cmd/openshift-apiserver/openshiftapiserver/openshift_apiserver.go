@@ -16,9 +16,13 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apiserver/pkg/admission"
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericmux "k8s.io/apiserver/pkg/server/mux"
+	genericapiserveroptions "k8s.io/apiserver/pkg/server/options"
+	"k8s.io/client-go/dynamic"
 	kubeinformers "k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	corev1client "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/restmapper"
@@ -101,6 +105,11 @@ type OpenshiftAPIExtraConfig struct {
 
 	// apiServers holds information about enabled/disabled API servers
 	APIServers openshiftcontrolplanev1.APIServers
+
+	AdmissionOptions     *genericapiserveroptions.AdmissionOptions
+	AdmissionInitializer admission.PluginInitializer
+	KubeClient           *kubernetes.Clientset
+	DynamicClient        *dynamic.DynamicClient
 }
 
 // Validate helps ensure that we build this config correctly, because there are lots of bits to remember for now

@@ -211,10 +211,10 @@ func NewOpenshiftAPIConfig(config *openshiftcontrolplanev1.OpenShiftAPIServerCon
 	}
 	admissionOptions.DisablePlugins = config.AdmissionConfig.DisabledAdmissionPlugins
 	admissionOptions.ConfigFile = admissionConfigFile
-	// TODO:
-	if err := admissionOptions.ApplyTo(&genericConfig.Config, kubeInformers, kubeClient, dynamicClient, nil, admissionInitializer); err != nil {
-		return nil, err
-	}
+	// // TODO:
+	// if err := admissionOptions.ApplyTo(&genericConfig.Config, kubeInformers, kubeClient, dynamicClient, nil, admissionInitializer); err != nil {
+	// 	return nil, err
+	// }
 
 	var externalRegistryHostname string
 	if len(config.ImagePolicyConfig.ExternalRegistryHostnames) > 0 {
@@ -271,6 +271,10 @@ func NewOpenshiftAPIConfig(config *openshiftcontrolplanev1.OpenShiftAPIServerCon
 			ClusterQuotaMappingController:      clusterQuotaMappingController,
 			RESTMapper:                         restMapper,
 			APIServers:                         config.APIServers,
+			AdmissionOptions:                   admissionOptions,
+			AdmissionInitializer:               admissionInitializer,
+			KubeClient:                         kubeClient,
+			DynamicClient:                      dynamicClient,
 		},
 	}
 
