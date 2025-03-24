@@ -97,7 +97,7 @@ func TestImageStreamImportQuayIO(t *testing.T) {
 	imports := &imageapi.ImageStreamImport{
 		Spec: imageapi.ImageStreamImportSpec{
 			Images: []imageapi.ImageImportSpec{
-				{From: kapi.ObjectReference{Kind: "DockerImage", Name: repositoryName}},
+				{From: kapi.ObjectReference{Kind: "DockerImage", Name: "quay.io/coreos/etcd:v3.5.19"}},
 			},
 		},
 	}
