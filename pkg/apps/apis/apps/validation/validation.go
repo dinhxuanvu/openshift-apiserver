@@ -7,14 +7,16 @@ import (
 	"strconv"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/resource"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	unversionedvalidation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
 	kvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	kapi "k8s.io/kubernetes/pkg/apis/core"
-	"k8s.io/kubernetes/pkg/apis/core/validation"
+
 	kapivalidation "k8s.io/kubernetes/pkg/apis/core/validation"
 
 	"github.com/openshift/library-go/pkg/image/imageutil"
@@ -24,7 +26,7 @@ import (
 )
 
 func ValidateDeploymentConfig(config *appsapi.DeploymentConfig) field.ErrorList {
-	allErrs := validation.ValidateObjectMeta(&config.ObjectMeta, true, apimachineryvalidation.NameIsDNSSubdomain, field.NewPath("metadata"))
+	allErrs := kapivalidation.ValidateObjectMeta(&config.ObjectMeta, true, apimachineryvalidation.NameIsDNSSubdomain, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidateDeploymentConfigSpec(config.Spec)...)
 	allErrs = append(allErrs, ValidateDeploymentConfigStatus(config.Status)...)
 	return allErrs
@@ -70,7 +72,7 @@ func ValidateDeploymentConfigSpec(spec appsapi.DeploymentConfigSpec) field.Error
 		originalContainerImageNames := getContainerImageNames(spec.Template)
 		defer setContainerImageNames(spec.Template, originalContainerImageNames)
 		handleEmptyImageReferences(spec.Template, spec.Triggers)
-		allErrs = append(allErrs, validation.ValidatePodTemplateSpecForRC(spec.Template, spec.Selector, spec.Replicas, specPath.Child("template"), validation.PodValidationOptions{})...)
+		allErrs = append(allErrs, kapivalidation.ValidatePodTemplateSpecForRC(spec.Template, spec.Selector, spec.Replicas, specPath.Child("template"), kapivalidation.PodValidationOptions{})...)
 	}
 	if spec.Replicas < 0 {
 		allErrs = append(allErrs, field.Invalid(specPath.Child("replicas"), spec.Replicas, "replicas cannot be negative"))
@@ -151,14 +153,14 @@ func ValidateDeploymentConfigStatus(status appsapi.DeploymentConfigStatus) field
 }
 
 func ValidateDeploymentConfigUpdate(newConfig *appsapi.DeploymentConfig, oldConfig *appsapi.DeploymentConfig) field.ErrorList {
-	allErrs := validation.ValidateObjectMetaUpdate(&newConfig.ObjectMeta, &oldConfig.ObjectMeta, field.NewPath("metadata"))
+	allErrs := kapivalidation.ValidateObjectMetaUpdate(&newConfig.ObjectMeta, &oldConfig.ObjectMeta, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidateDeploymentConfig(newConfig)...)
 	allErrs = append(allErrs, ValidateDeploymentConfigStatusUpdate(newConfig, oldConfig)...)
 	return allErrs
 }
 
 func ValidateDeploymentConfigStatusUpdate(newConfig *appsapi.DeploymentConfig, oldConfig *appsapi.DeploymentConfig) field.ErrorList {
-	allErrs := validation.ValidateObjectMetaUpdate(&newConfig.ObjectMeta, &oldConfig.ObjectMeta, field.NewPath("metadata"))
+	allErrs := kapivalidation.ValidateObjectMetaUpdate(&newConfig.ObjectMeta, &oldConfig.ObjectMeta, field.NewPath("metadata"))
 	allErrs = append(allErrs, ValidateDeploymentConfigStatus(newConfig.Status)...)
 	statusPath := field.NewPath("status")
 	if newConfig.Status.LatestVersion < oldConfig.Status.LatestVersion {
@@ -248,7 +250,7 @@ func validateDeploymentStrategy(strategy *appsapi.DeploymentStrategy, pod *kapi.
 		errs = append(errs, unversionedvalidation.ValidateLabels(strategy.Labels, fldPath.Child("labels"))...)
 	}
 	if strategy.Annotations != nil {
-		errs = append(errs, validation.ValidateAnnotations(strategy.Annotations, fldPath.Child("annotations"))...)
+		errs = append(errs, kapivalidation.ValidateAnnotations(strategy.Annotations, fldPath.Child("annotations"))...)
 	}
 
 	podClaimNames := sets.New[string]()
@@ -258,7 +260,34 @@ func validateDeploymentStrategy(strategy *appsapi.DeploymentStrategy, pod *kapi.
 		}
 	}
 
-	errs = append(errs, validation.ValidateResourceRequirements(&strategy.Resources, podClaimNames, fldPath.Child("resources"), kapivalidation.PodValidationOptions{})...)
+	if strategy.Resources.Limits != nil {
+		for resourceName, quantity := range strategy.Resources.Limits {
+			quota := &kapi.ResourceQuota{
+				Spec: kapi.ResourceQuotaSpec{
+					Hard: map[kapi.ResourceName]resource.Quantity{
+						resourceName: quantity,
+					},
+				},
+			}
+			if errs = kapivalidation.ValidateResourceQuota(quota); len(errs) > 0 {
+				errs = append(errs, errs...)
+			}
+		}
+	}
+	if strategy.Resources.Requests != nil {
+		for resourceName, quantity := range strategy.Resources.Requests {
+			quota := &kapi.ResourceQuota{
+				Spec: kapi.ResourceQuotaSpec{
+					Hard: map[kapi.ResourceName]resource.Quantity{
+						resourceName: quantity,
+					},
+				},
+			}
+			if errs = kapivalidation.ValidateResourceQuota(quota); len(errs) > 0 {
+				errs = append(errs, errs...)
+			}
+		}
+	}
 
 	if strategy.ActiveDeadlineSeconds != nil {
 		errs = append(errs, kapivalidation.ValidateNonnegativeField(*strategy.ActiveDeadlineSeconds, fldPath.Child("activeDeadlineSeconds"))...)
@@ -584,7 +613,7 @@ func ValidateDeploymentLogOptions(opts *appsapi.DeploymentLogOptions) field.Erro
 
 	// TODO: Replace by validating PodLogOptions via DeploymentLogOptions once it's bundled in
 	popts := appsapi.DeploymentToPodLogOptions(opts)
-	if errs := validation.ValidatePodLogOptions(popts); len(errs) > 0 {
+	if errs := kapivalidation.ValidatePodLogOptions(popts, opts.Previous); len(errs) > 0 {
 		allErrs = append(allErrs, errs...)
 	}
 

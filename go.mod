@@ -31,7 +31,7 @@ require (
 	go.etcd.io/etcd/client/v3 v3.5.16
 	k8s.io/api v0.32.3
 	k8s.io/apiextensions-apiserver v0.32.1
-	k8s.io/apimachinery v0.32.3
+	k8s.io/apimachinery v0.32.1
 	k8s.io/apiserver v0.32.1
 	k8s.io/client-go v1.5.2
 	k8s.io/cloud-provider v0.32.1
@@ -47,6 +47,7 @@ require (
 )
 
 require (
+	cel.dev/expr v0.18.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -81,7 +82,6 @@ require (
 	github.com/go-openapi/swag v0.23.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/cel-go v0.22.0 // indirect
@@ -96,7 +96,6 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
@@ -107,6 +106,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/moby/spdystream v0.5.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
+	github.com/moby/sys/user v0.3.0 // indirect
 	github.com/moby/term v0.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -149,7 +149,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
-	go.starlark.net v0.0.0-20230525235612-a134d8f9ddca // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
@@ -195,7 +194,7 @@ replace (
 	k8s.io/api => k8s.io/api v0.32.1
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.32.1
 	k8s.io/apimachinery => k8s.io/apimachinery v0.32.1
-	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20250205074533-d8ec43992017 // points to openshift-apiserver-4.18-kubernetes-1.31.1
+	k8s.io/apiserver => github.com/openshift/kubernetes-apiserver v0.0.0-20250116013846-c09fadd4305d // points to openshift-apiserver-4.19-kubernetes-1.32.1
 	k8s.io/cli-runtime => k8s.io/cli-runtime v0.32.1
 	k8s.io/client-go => k8s.io/client-go v0.32.1
 	k8s.io/cloud-provider => k8s.io/cloud-provider v0.32.1
